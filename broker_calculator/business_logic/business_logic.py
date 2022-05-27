@@ -1,15 +1,18 @@
+import datetime
 import logging
 import importlib
 
 
-def get_brokerage_for_sip(broker_name, interval, start_date, end_date, amount, currency):
+def get_brokerage_for_sip(ticker: str, broker_name: str, interval: str, start_date: datetime.date,
+                          end_date: datetime.date, amount: float, currency: str):
     _module = f'broker_calculator.models.{broker_name.lower()}'
     try:
         module = importlib.import_module(_module)
         try:
             broker = getattr(module, broker_name)()
             try:
-                return broker.get_brokerage_for_sip(broker_name, interval, start_date, end_date, amount, currency)
+                return broker.get_brokerage_for_sip(ticker, broker_name, interval,
+                                                    start_date, end_date, amount, currency)
             except AttributeError as method_not_found:
                 logging.debug(method_not_found)
                 logging.error(f'broker {broker_name} should implement get_brokerage_for_sip function.')

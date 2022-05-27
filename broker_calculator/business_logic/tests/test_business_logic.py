@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -10,7 +11,7 @@ class MockBroker:
     def __init__(self):
         self.brokerage = 0.0
 
-    def get_brokerage_for_sip(self, broker_name, interval, start_date, end_date, amount, currency):
+    def get_brokerage_for_sip(self, ticker, broker_name, interval, start_date, end_date, amount, currency):
         return self.brokerage
 
 
@@ -20,16 +21,18 @@ class MockBrokerWithoutSipImplementation:
 
 class TestGetBrokerageForSIP(unittest.TestCase):
     def setUp(self) -> None:
+        self.ticker = 'AAPL'
         self.broker_name = 'Broker'
         self.interval = 'monthly'
-        self.start_date = '2022-01-01'
-        self.end_date = '2022-02-01'
-        self.amount = '1000'
+        self.start_date = datetime.date(2022, 1, 1)
+        self.end_date = datetime.date(2023, 1, 1)
+        self.amount = 1000.0
         self.currency = 'USD'
 
     @patch('broker_calculator.models.broker.Broker', new=MockBroker)
     def test_get_brokerage_for_sip(self):
         brokerage = business_logic.get_brokerage_for_sip(
+            ticker=self.ticker,
             broker_name=self.broker_name,
             interval=self.interval,
             start_date=self.start_date,
@@ -42,6 +45,7 @@ class TestGetBrokerageForSIP(unittest.TestCase):
     def test_package_for_broker_does_exist(self):
         with pytest.raises(NotImplementedError) as nie:
             _ = business_logic.get_brokerage_for_sip(
+                ticker=self.ticker,
                 broker_name='RandomBroker',
                 interval=self.interval,
                 start_date=self.start_date,
@@ -54,6 +58,7 @@ class TestGetBrokerageForSIP(unittest.TestCase):
     def test_broker_not_found_in_package(self):
         with pytest.raises(NotImplementedError) as nie:
             _ = business_logic.get_brokerage_for_sip(
+                ticker=self.ticker,
                 broker_name='BROKER',
                 interval=self.interval,
                 start_date=self.start_date,
@@ -67,6 +72,7 @@ class TestGetBrokerageForSIP(unittest.TestCase):
     def test_broker_does_not_implement_get_brokerage_for_sip(self):
         with pytest.raises(NotImplementedError) as nie:
             _ = business_logic.get_brokerage_for_sip(
+                ticker=self.ticker,
                 broker_name=self.broker_name,
                 interval=self.interval,
                 start_date=self.start_date,
